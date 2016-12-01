@@ -8,6 +8,7 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="app-pouchdb-database-behavior.html">
 <link rel="import" href="pouchdb.html">
 <!--
 `app-pouchdb-sync` arranges for one-directional or bi-directional
@@ -20,8 +21,8 @@ and a remote one:
 
 ```html
 <app-pouchdb-sync
-    src="cats"
-    target="https://example.com:5678/cats"
+    local="cats"
+    remote="https://example.com:5678/cats"
     bidirectional>
 </app-pouchdb-sync>
 ```
@@ -36,26 +37,22 @@ documentation [here](https://pouchdb.com/guides/replication.html).
     Polymer({
       is: 'app-pouchdb-sync',
 
+      behaviors: [
+        Polymer.AppPouchDBDatabaseBehavior
+      ],
+
       properties: {
         /**
-         * The source to sync from. If this sync is `bidirectional`, then the
-         * `src` and `target` values are interchangeable.
+         * The `remote` to sync to. If this sync is `bidirectional`, then the
+         * `local` and `remote` values are interchangeable.
          */
-        src: {
+        remote: {
           type: String
         },
 
         /**
-         * The `target` to sync to. If this sync is `bidirectional`, then the
-         * `src` and `target` values are interchangeable.
-         */
-        target: {
-          type: String
-        },
-
-        /**
-         * While `false`, synchronization will only happen from the `src` to the
-         * `target`. One-directional synchronization follows the semantics of
+         * While `false`, synchronization will only happen from the `local` to the
+         * `remote`. One-directional synchronization follows the semantics of
          * `PouchDB.replicate`. Set to `true` to make the sync bidirectional,
          * which uses `PouchDB.sync` instead.
          */
@@ -70,7 +67,7 @@ documentation [here](https://pouchdb.com/guides/replication.html).
          */
         sync: {
           type: Object,
-          computed: '__computeSync(src, target, bidirectional)',
+          computed: '__computeSync(db, remote, bidirectional)',
           observer: '__syncChanged'
         },
 
@@ -84,14 +81,15 @@ documentation [here](https://pouchdb.com/guides/replication.html).
         }
       },
 
-      __computeSync: function(src, target, bidirectional) {
+      __computeSync: function(db, remote, bidirectional) {
         var options = {
           live: true,
           retry: true
         }
+        // @see https://github.com/nolanlawson/worker-pouch#does-replication-occur-inside-the-worker
         return bidirectional ?
-          PouchDB.sync(src, target, options) :
-          PouchDB.replicate(src, target, options);
+          db.sync(remote, options) :
+          db.replicate.to(remote, options);
       },
 
       __syncChanged: function(sync, oldSync) {
