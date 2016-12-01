@@ -215,7 +215,7 @@ documentation on pouchdb-find selectors, please check out the docs
 
       __parseDimension: function(parsedSelector, dimension) {
         var parsedDimension = {};
-        var tokens = dimension.split(/\s+/);
+        var tokens = dimension.match(/(?:[^\s"']+|["'][^"']*["'])+/g);
         var field = tokens.shift();
 
         while (tokens.length > 1) {
