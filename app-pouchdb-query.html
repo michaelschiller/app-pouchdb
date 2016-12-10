@@ -188,7 +188,9 @@ documentation on pouchdb-find selectors, please check out the docs
 
         query.selector = this.parsedSelector;
         query.fields = this.fields;
-        query.sort = this.sort;
+        if(this.sort.length > 0) {
+          query.sort = this.sort;
+        }
 
         if (this.limit) {
           query.limit = this.limit;
