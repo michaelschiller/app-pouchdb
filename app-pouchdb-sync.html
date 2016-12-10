@@ -78,6 +78,11 @@ documentation [here](https://pouchdb.com/guides/replication.html).
         log: {
           type: Boolean,
           value: false
+        },
+
+        lastChange: {
+          type: Object,
+          notify: true
         }
       },
 
@@ -108,6 +113,7 @@ documentation [here](https://pouchdb.com/guides/replication.html).
         if (this.log) {
           console.log(change);
         }
+        this.lastChange = change;
       },
 
       __onSyncError: function(error) {
